@@ -1,66 +1,47 @@
-## Foundry
+# EIP-7702 Local Demo: Batch Approve and Transfer in One Transaction
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This project demonstrates how to use [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702) to temporarily upgrade an EOA into a smart account, enabling atomic batch execution in a single transaction. This allows use cases like approve followed immediately by transfer, or approve followed by a Uniswap-style swap, all within one transaction. The workflow runs entirely on a local Foundry anvil network.
 
-Foundry consists of:
+## Quick Start
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+1. Clone the repository
 
-## Documentation
+   ```
+   git clone https://github.com/a39955720/eip7702-demo
+   cd eip7702-demo
+   ```
 
-https://book.getfoundry.sh/
+2. Start a local anvil node with the Prague/Pectra hardfork enabled
 
-## Usage
+   ```
+   anvil --hardfork prague
+   ```
 
-### Build
+3. Install dependencies
 
-```shell
-$ forge build
-```
+   ```
+   forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts
+   ```
 
-### Test
+4. Build and run the tests
 
-```shell
-$ forge test
-```
+   ```
+   forge build
+   forge test -vvv
+   ```
 
-### Format
+   The tests demonstrate that an EOA can complete both approve and transfer or approve and Uniswap-like swap operations in a single EIP-7702 type-4 transaction.
 
-```shell
-$ forge fmt
-```
+## Project Structure and How It Works
 
-### Gas Snapshots
+- `src/BatchApproveTransfer.sol`: Minimal contract that enables batch execution of multiple contract calls through an EIP-7702 delegated EOA.
+- `src/MockERC20.sol`: Mock ERC20 contract for demonstration and testing.
+- `src/MockUniswapRouter.sol`: Mock Uniswap-like router contract, allowing a swap via `exactInputSingle`. The router will call `transferFrom` on a token, simulating a real Uniswap pool interaction.
+- `test/BatchApproveTransfer.t.sol`: Core test file where an EOA (Alice) becomes a temporary smart account using EIP-7702 delegation, then executes approve plus transfer or approve plus swap in a single transaction.
+- The process uses the Foundry cheatcode `vm.signAndAttachDelegation` to enable temporary delegation.
 
-```shell
-$ forge snapshot
-```
+## References
 
-### Anvil
+- [QuickNode EIP-7702 Guide](https://www.quicknode.com/guides/ethereum-development/smart-contracts/eip-7702-smart-accounts)
 
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+---
